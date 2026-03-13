@@ -1,0 +1,773 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicAI | Citizen Registration</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+:root{
+--primary:#2d5a4b;
+--background:#faf9f6;
+--border:#e7e7e7;
+--text:#2c2c2c;
+--radius:14px;
+}
+
+body{
+font-family:'Inter',sans-serif;
+background:var(--background);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+color:var(--text);
+}
+
+/* welcome */
+
+.welcome{
+position:fixed;
+inset:0;
+background:white;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+transition:1s;
+}
+
+.welcome.hide{
+opacity:0;
+pointer-events:none;
+}
+
+.welcome i{
+font-size:70px;
+color:var(--primary);
+animation:float 3s infinite ease-in-out;
+}
+
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+/* card */
+
+.card-auth{
+width:100%;
+max-width:520px;
+background:white;
+padding:35px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* inputs */
+
+.form-control{
+padding:14px 16px;
+border-radius:var(--radius);
+border:1px solid var(--border);
+}
+
+.form-control:focus{
+border-color:var(--primary);
+box-shadow:0 0 0 3px rgba(45,90,75,0.15);
+}
+
+.input-icon{
+position:absolute;
+left:14px;
+top:50%;
+transform:translateY(-50%);
+color:#777;
+}
+
+.input-group-custom{
+position:relative;
+}
+
+.input-group-custom input{
+padding-left:40px;
+}
+
+/* profile upload */
+
+.profile-upload{
+width:110px;
+height:110px;
+border-radius:50%;
+border:2px dashed #ccc;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:auto;
+cursor:pointer;
+overflow:hidden;
+position:relative;
+}
+
+.profile-upload img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.profile-upload i{
+font-size:28px;
+color:#888;
+}
+
+.profile-upload:hover::after{
+content:"\f030";
+font-family:"Font Awesome 6 Free";
+font-weight:900;
+position:absolute;
+background:rgba(0,0,0,0.5);
+color:white;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+}
+
+/* password strength */
+
+.strength{
+height:6px;
+background:#eee;
+border-radius:5px;
+margin-top:6px;
+overflow:hidden;
+}
+
+.strength-bar{
+height:100%;
+width:0%;
+transition:.3s;
+}
+
+/* otp */
+
+.otp-box{
+display:flex;
+gap:10px;
+justify-content:center;
+}
+
+.otp-input{
+width:45px;
+height:55px;
+border-radius:10px;
+border:1px solid #ddd;
+font-size:24px;
+text-align:center;
+}
+
+/* buttons */
+
+.btn-primary{
+background:var(--primary);
+border:none;
+padding:13px;
+border-radius:30px;
+}
+
+.btn-primary:hover{
+background:#24483b;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="welcome" id="welcome">
+<div class="text-center">
+<i class="fa-solid fa-city mb-3"></i>
+<h2>CivicAI</h2>
+<p>Your Voice · Smarter City</p>
+</div>
+</div>
+
+<div class="card-auth">
+
+<h4 class="text-center mb-4">Citizen Registration</h4>
+
+<!-- STEP 1 -->
+
+<div id="stepEmail">
+
+<form id="emailForm">
+
+<div class="input-group-custom mb-3">
+
+<i class="fa fa-envelope input-icon"></i>
+
+<input type="email"
+id="email"
+class="form-control"
+placeholder="Email address"
+required>
+
+</div>
+
+<button class="btn btn-primary w-100" id="sendBtn">
+Send verification code
+</button>
+
+</form>
+
+</div>
+
+<!-- STEP 2 -->
+
+<div id="stepRegister" style="display:none">
+
+<form id="registerForm">
+
+<div class="text-center mb-3">
+
+<label class="profile-upload">
+
+<input type="file" id="profile_pic" hidden accept="image/*">
+
+<img id="profilePreview" style="display:none">
+
+<i class="fa fa-user"></i>
+
+</label>
+
+</div>
+
+<div class="input-group-custom mb-3">
+
+<i class="fa fa-user input-icon"></i>
+
+<input type="text" class="form-control"
+id="username"
+placeholder="Username"
+required>
+
+</div>
+
+<div class="input-group-custom mb-3">
+
+<i class="fa fa-phone input-icon"></i>
+
+<input type="text" class="form-control"
+id="phone"
+placeholder="Phone number">
+
+</div>
+
+<div class="input-group-custom mb-3">
+
+<i class="fa fa-location-dot input-icon"></i>
+
+<input type="text" class="form-control"
+id="address"
+placeholder="Address">
+
+</div>
+
+<div class="input-group-custom mb-2">
+
+<i class="fa fa-lock input-icon"></i>
+
+<input type="password"
+class="form-control"
+id="password"
+placeholder="Password"
+required>
+
+</div>
+
+<div class="strength">
+
+<div class="strength-bar" id="strengthBar"></div>
+
+</div>
+
+<div class="input-group-custom mt-3 mb-3">
+
+<i class="fa fa-lock input-icon"></i>
+
+<input type="password"
+class="form-control"
+id="confirmPassword"
+placeholder="Confirm password"
+required>
+
+</div>
+
+<button class="btn btn-primary w-100" id="createBtn" disabled>
+Create Account
+</button>
+
+</form>
+
+</div>
+
+<div class="text-center mt-4">
+
+<hr>
+
+<p class="small">
+Already have an account?
+<a href="/login">Sign in instead</a>
+</p>
+
+</div>
+
+</div>
+
+<!-- OTP MODAL -->
+
+<div class="modal fade" id="otpModal">
+
+<div class="modal-dialog modal-dialog-centered">
+
+<div class="modal-content p-4 text-center">
+
+<h5>Email Verification</h5>
+
+<p class="small">Enter the 6 digit code sent to your email</p>
+
+<form id="otpForm">
+
+<div class="otp-box mb-3">
+
+<input maxlength="1" class="otp-input">
+<input maxlength="1" class="otp-input">
+<input maxlength="1" class="otp-input">
+<input maxlength="1" class="otp-input">
+<input maxlength="1" class="otp-input">
+<input maxlength="1" class="otp-input">
+
+</div>
+
+<button class="btn btn-primary w-100">Verify</button>
+
+<div class="small mt-2">
+
+<span id="timer"></span>
+
+<button type="button" id="resendBtn" class="btn btn-link" disabled>
+Resend
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+/* --------------------------
+WELCOME OVERLAY
+-------------------------- */
+
+setTimeout(()=>{
+document.getElementById("welcome").classList.add("hide")
+},2000)
+
+
+/* --------------------------
+ELEMENT REFERENCES
+-------------------------- */
+
+const emailForm = document.getElementById("emailForm")
+const emailInput = document.getElementById("email")
+const sendBtn = document.getElementById("sendBtn")
+
+const otpModalEl = document.getElementById("otpModal")
+const otpForm = document.getElementById("otpForm")
+const otpInputs = document.querySelectorAll(".otp-input")
+
+const resendBtn = document.getElementById("resendBtn")
+const timerEl = document.getElementById("timer")
+
+const stepEmail = document.getElementById("stepEmail")
+const stepRegister = document.getElementById("stepRegister")
+
+const username = document.getElementById("username")
+const phone = document.getElementById("phone")
+const address = document.getElementById("address")
+
+const password = document.getElementById("password")
+const confirmPassword = document.getElementById("confirmPassword")
+
+const createBtn = document.getElementById("createBtn")
+
+const strengthBar = document.getElementById("strengthBar")
+
+const registerForm = document.getElementById("registerForm")
+
+const profileInput = document.getElementById("profile_pic")
+const profilePreview = document.getElementById("profilePreview")
+
+/* --------------------------
+STATE
+-------------------------- */
+
+let emailVerified = false
+let userEmail = ""
+let timerInterval = null
+
+
+/* --------------------------
+PROFILE PREVIEW
+-------------------------- */
+
+profileInput.addEventListener("change",function(){
+
+const file = this.files[0]
+
+if(!file) return
+
+const url = URL.createObjectURL(file)
+
+profilePreview.src = url
+profilePreview.style.display = "block"
+
+})
+
+
+/* --------------------------
+PASSWORD STRENGTH
+-------------------------- */
+
+password.addEventListener("input",()=>{
+
+let p = password.value
+let score = 0
+
+if(p.length >= 8) score++
+if(/[A-Z]/.test(p)) score++
+if(/[a-z]/.test(p)) score++
+if(/[0-9]/.test(p)) score++
+
+let percent = (score/4)*100
+
+strengthBar.style.width = percent + "%"
+
+strengthBar.style.background =
+score <= 1 ? "red" :
+score == 2 ? "orange" :
+score == 3 ? "#ffc107" :
+"green"
+
+validateForm()
+
+})
+
+
+/* --------------------------
+CONFIRM PASSWORD
+-------------------------- */
+
+confirmPassword.addEventListener("input",validateForm)
+
+
+/* --------------------------
+VALIDATION
+-------------------------- */
+
+function validateForm(){
+
+if(
+username.value &&
+password.value.length >= 8 &&
+password.value === confirmPassword.value &&
+emailVerified
+){
+createBtn.disabled = false
+}else{
+createBtn.disabled = true
+}
+
+}
+
+
+/* --------------------------
+OTP INPUT AUTO FOCUS
+-------------------------- */
+
+otpInputs.forEach((input,index)=>{
+
+input.addEventListener("input",()=>{
+
+if(input.value && index < 5){
+otpInputs[index+1].focus()
+}
+
+})
+
+input.addEventListener("keydown",(e)=>{
+
+if(e.key === "Backspace" && !input.value && index > 0){
+otpInputs[index-1].focus()
+}
+
+})
+
+})
+
+
+/* --------------------------
+OTP PASTE SUPPORT
+-------------------------- */
+
+otpInputs[0].addEventListener("paste",(e)=>{
+
+let paste = e.clipboardData.getData("text").trim()
+
+if(paste.length === 6){
+
+paste.split("").forEach((c,i)=>{
+otpInputs[i].value = c
+})
+
+}
+
+})
+
+
+/* --------------------------
+TIMER
+-------------------------- */
+
+function startTimer(){
+
+let time = 60
+
+resendBtn.disabled = true
+
+timerInterval = setInterval(()=>{
+
+timerEl.textContent = "Resend in " + time + "s"
+
+time--
+
+if(time < 0){
+
+clearInterval(timerInterval)
+
+resendBtn.disabled = false
+
+timerEl.textContent = ""
+
+}
+
+},1000)
+
+}
+
+
+/* --------------------------
+SEND OTP
+-------------------------- */
+
+emailForm.addEventListener("submit",async(e)=>{
+
+e.preventDefault()
+
+const email = emailInput.value.trim().toLowerCase()
+
+if(!email){
+alert("Please enter email")
+return
+}
+
+sendBtn.disabled = true
+sendBtn.innerHTML = "Sending..."
+
+try{
+
+const res = await fetch("/send-otp",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({email:email})
+})
+
+const data = await res.json()
+
+if(!data.success){
+throw new Error(data.error || "Failed to send OTP")
+}
+
+userEmail = email
+
+const modal = new bootstrap.Modal(otpModalEl)
+modal.show()
+
+startTimer()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+sendBtn.disabled = false
+sendBtn.innerHTML = "Send verification code"
+
+})
+
+
+/* --------------------------
+VERIFY OTP
+-------------------------- */
+
+otpForm.addEventListener("submit",async(e)=>{
+
+e.preventDefault()
+
+let otp = [...otpInputs].map(i=>i.value).join("")
+
+if(otp.length !== 6){
+alert("Enter complete OTP")
+return
+}
+
+try{
+
+const res = await fetch("/verify-otp",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+email:userEmail,
+otp:otp
+})
+})
+
+const data = await res.json()
+
+if(!data.success){
+throw new Error(data.error || "Invalid OTP")
+}
+
+emailVerified = true
+
+bootstrap.Modal.getInstance(otpModalEl).hide()
+
+stepEmail.style.display = "none"
+stepRegister.style.display = "block"
+
+validateForm()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+})
+
+
+/* --------------------------
+RESEND OTP
+-------------------------- */
+
+resendBtn.addEventListener("click",async()=>{
+
+if(!userEmail) return
+
+await fetch("/resend-otp",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({email:userEmail})
+})
+
+startTimer()
+
+})
+
+
+/* --------------------------
+REGISTER USER
+-------------------------- */
+
+registerForm.addEventListener("submit",async(e)=>{
+
+e.preventDefault()
+
+const formData = new FormData()
+
+formData.append("username",username.value)
+formData.append("email",userEmail)
+formData.append("phone",phone.value)
+formData.append("address",address.value)
+formData.append("password",password.value)
+
+if(profileInput.files[0]){
+formData.append("profile_pic",profileInput.files[0])
+}
+
+createBtn.disabled = true
+createBtn.innerHTML = "Creating..."
+
+try{
+
+const res = await fetch("/register",{
+method:"POST",
+body:formData
+})
+
+const data = await res.json()
+
+if(!data.success){
+throw new Error(data.error || "Registration failed")
+}
+
+alert("Account created successfully!")
+
+window.location.href = "/login"
+
+}catch(err){
+
+alert(err.message)
+
+createBtn.disabled = false
+createBtn.innerHTML = "Create Account"
+
+}
+
+})
+
+})
+
+</script>
+
+</body>
+</html>

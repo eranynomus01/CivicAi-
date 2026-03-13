@@ -1,0 +1,1155 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI · Dashboard</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Google Fonts - Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* ===== DESIGN SYSTEM ===== */
+        :root {
+            --primary-50: #f0f5f3;
+            --primary-100: #d1e0db;
+            --primary-200: #b3ccc4;
+            --primary-300: #94b8ac;
+            --primary-400: #76a495;
+            --primary-500: #2d5a4b;  /* Main primary */
+            --primary-600: #24483d;
+            --primary-700: #1b362e;
+            --primary-800: #12241f;
+            --primary-900: #09120f;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f0f2f5;
+            --gray-200: #e4e7ec;
+            --gray-300: #d2d6dc;
+            --gray-400: #9fa6b2;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            --success: #0e7b4e;
+            --success-light: #e3f5eb;
+            --warning: #b26b00;
+            --warning-light: #fff0d9;
+            --danger: #b53b3b;
+            --danger-light: #fee7e7;
+            --info: #2563eb;
+            --info-light: #dbeafe;
+            
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --card-radius: 20px;
+            --border-radius: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-500);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon i {
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--gray-900);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text span {
+            color: var(--primary-500);
+            font-weight: 500;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-section-title {
+            padding: 0 12px;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 12px;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item i {
+            width: 20px;
+            font-size: 1.1rem;
+            color: var(--gray-500);
+            transition: var(--transition);
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--primary-500);
+        }
+
+        .nav-item:hover i {
+            color: var(--primary-500);
+        }
+
+        .nav-item.active {
+            background: var(--primary-50);
+            color: var(--primary-500);
+            font-weight: 600;
+        }
+
+        .nav-item.active i {
+            color: var(--primary-500);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--gray-50);
+        }
+
+        /* ===== TOP NAVBAR ===== */
+        .top-nav {
+            height: var(--header-height);
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .welcome-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-greeting {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-bottom: 2px;
+        }
+
+        .welcome-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            padding: 10px 16px 10px 42px;
+            border: 1px solid var(--gray-200);
+            border-radius: 30px;
+            width: 300px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--gray-50);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            background: white;
+            box-shadow: 0 0 0 4px var(--primary-50);
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .notification-bell i {
+            font-size: 1.3rem;
+            color: var(--gray-600);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px -10px var(--primary-500);
+        }
+
+        /* ===== DASHBOARD CONTENT ===== */
+        .dashboard-content {
+            padding: 32px;
+        }
+
+        /* ===== STATS CARDS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-300));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -10px rgba(45, 90, 75, 0.15);
+            border-color: var(--primary-200);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-50);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-500);
+            font-size: 1.4rem;
+        }
+
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* ===== CHART + TIMELINE GRID ===== */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+
+        .chart-period {
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        /* ===== TIMELINE TRACKER ===== */
+        .timeline-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+
+        .complaint-id {
+            font-size: 0.8rem;
+            color: var(--primary-500);
+            background: var(--primary-50);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 2px solid var(--gray-300);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: var(--gray-500);
+            font-size: 1rem;
+            transition: var(--transition);
+            position: relative;
+            z-index: 3;
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-dot.active {
+            border-color: var(--primary-500);
+            background: white;
+            color: var(--primary-500);
+            box-shadow: 0 0 0 4px var(--primary-50);
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 4px;
+        }
+
+        .step-date {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gray-200);
+            z-index: 1;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s ease;
+        }
+
+        /* ===== RECENT COMPLAINTS TABLE ===== */
+        .table-section {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+
+        .view-all {
+            color: var(--primary-500);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .view-all:hover {
+            color: var(--primary-600);
+        }
+
+        .complaints-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .complaints-table th {
+            text-align: left;
+            padding: 16px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .complaints-table td {
+            padding: 16px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .complaints-table tr:hover td {
+            background: var(--gray-50);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.pending {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .status-badge.in-progress {
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        .status-badge.resolved {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-badge.rejected {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .priority-badge.high {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .priority-badge.medium {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .priority-badge.low {
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-300);
+            box-shadow: 0 20px 30px -10px rgba(45, 90, 75, 0.15);
+        }
+
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary-50);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-500);
+            font-size: 1.5rem;
+        }
+
+        .action-content h4 {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        .action-content p {
+            color: var(--gray-500);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-nav {
+                padding: 0 20px;
+            }
+            
+            .welcome-section {
+                display: none;
+            }
+            
+            .search-input {
+                width: 160px;
+            }
+            
+            .dashboard-content {
+                padding: 20px;
+            }
+            
+            .complaints-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .progress-steps {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .progress-step {
+                flex: 0 0 calc(33.333% - 14px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-actions {
+                gap: 12px;
+            }
+            
+            .search-wrapper {
+                display: none;
+            }
+            
+            .progress-step {
+                flex: 0 0 calc(50% - 10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <span class="logo-text">Civic<span>AI</span></span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="#" class="nav-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Submit Complaint</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-list"></i>
+                        <span>My Complaints</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Complaint Status</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Account</div>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                        <span class="notification-badge" style="position: static; margin-left: auto;"></span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-user"></i>
+                        <span>Profile Settings</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOP NAVBAR -->
+            <header class="top-nav">
+                <div class="welcome-section">
+                    <span class="welcome-greeting">Welcome back,</span>
+                    <span class="welcome-name">{{ user.username }}</span>
+                </div>
+
+                <div class="nav-actions">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search complaints...">
+                    </div>
+                    
+                    <div class="notification-bell">
+                        <i class="far fa-bell"></i>
+                        <span class="notification-badge"></span>
+                    </div>
+
+                    <div class="user-avatar">
+                        {{ user.username[0]|upper }}
+                    </div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD CONTENT -->
+            <div class="dashboard-content">
+                <!-- STATS CARDS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ total_complaints }}</div>
+                        <div class="stat-label">Total Complaints</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ resolved }}</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ pending }}</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-spinner"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ in_progress }}</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS GRID -->
+                <div class="analytics-grid">
+                    <!-- CHART -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Complaint Activity</h3>
+                            <span class="chart-period">Last 7 days</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="complaintChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- TIMELINE TRACKER -->
+                    <div class="timeline-card">
+                        <div class="timeline-header">
+                            <h3 class="timeline-title">Active Complaint Tracking</h3>
+                            {% if active_complaint %}
+                                <span class="complaint-id">#{{ active_complaint.complaint_number }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if active_complaint %}
+                            <div class="progress-steps">
+                                <div class="progress-line">
+                                    {% set stages = ['pending', 'verified', 'assigned', 'in_progress', 'resolved'] %}
+                                    {% set current_index = stages.index(active_complaint.status) if active_complaint.status in stages else 0 %}
+                                    <div class="progress-fill" style="width: {{ (current_index / 4) * 100 }}%"></div>
+                                </div>
+
+                                <div class="progress-step">
+                                    <div class="step-dot {% if current_index >= 0 %}completed{% endif %}">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="step-label">Submitted</div>
+                                    <div class="step-date">{{ active_complaint.created_at.strftime('%b %d') }}</div>
+                                </div>
+
+                                <div class="progress-step">
+                                    <div class="step-dot {% if current_index >= 1 %}completed{% endif %} {% if current_index == 1 %}active{% endif %}">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="step-label">Verified</div>
+                                </div>
+
+                                <div class="progress-step">
+                                    <div class="step-dot {% if current_index >= 2 %}completed{% endif %} {% if current_index == 2 %}active{% endif %}">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="step-label">Assigned</div>
+                                </div>
+
+                                <div class="progress-step">
+                                    <div class="step-dot {% if current_index >= 3 %}completed{% endif %} {% if current_index == 3 %}active{% endif %}">
+                                        <i class="fas fa-spinner"></i>
+                                    </div>
+                                    <div class="step-label">In Progress</div>
+                                </div>
+
+                                <div class="progress-step">
+                                    <div class="step-dot {% if current_index >= 4 %}completed{% endif %} {% if current_index == 4 %}active{% endif %}">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="step-label">Resolved</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; padding: 40px; color: var(--gray-500);">
+                                <i class="fas fa-inbox" style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;"></i>
+                                <p>No active complaints to track</p>
+                                <a href="#" class="btn btn-sm btn-primary" style="margin-top: 12px;">Submit a Complaint</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- RECENT COMPLAINTS TABLE -->
+                <div class="table-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Recent Complaints</h3>
+                        <a href="#" class="view-all">View All <i class="fas fa-arrow-right ms-2"></i></a>
+                    </div>
+
+                    <table class="complaints-table">
+                        <thead>
+                            <tr>
+                                <th>Complaint ID</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_complaints %}
+                                {% for complaint in recent_complaints %}
+                                <tr>
+                                    <td><strong>#{{ complaint.complaint_number }}</strong></td>
+                                    <td>{{ complaint.category }}</td>
+                                    <td>{{ complaint.location|truncate(20) }}</td>
+                                    <td>
+                                        <span class="status-badge 
+                                            {% if complaint.status == 'pending' %}pending
+                                            {% elif complaint.status in ['assigned', 'in_progress'] %}in-progress
+                                            {% elif complaint.status == 'resolved' %}resolved
+                                            {% else %}rejected{% endif %}">
+                                            {{ complaint.status|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge {{ complaint.priority|lower }}">
+                                            <i class="fas fa-flag"></i>
+                                            {{ complaint.priority|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ complaint.created_at.strftime('%b %d, %Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray-500);">
+                                        <i class="fas fa-inbox" style="font-size: 30px; margin-bottom: 12px; opacity: 0.5; display: block;"></i>
+                                        No complaints yet. Submit your first complaint!
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="quick-actions">
+                    <a href="#" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Submit Complaint</h4>
+                            <p>Report a new civic issue</p>
+                        </div>
+                    </a>
+
+                    <a href="#" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Track Complaint</h4>
+                            <p>Check status by ID</p>
+                        </div>
+                    </a>
+
+                    <a href="#" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>View Map</h4>
+                            <p>See issues near you</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS (for responsive toggle) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Chart initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('complaintChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels|tojson }},
+                    datasets: [{
+                        label: 'Complaints',
+                        data: {{ chart_data|tojson }},
+                        borderColor: '#2d5a4b',
+                        backgroundColor: 'rgba(45, 90, 75, 0.05)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#2d5a4b',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            titleColor: '#1f2937',
+                            bodyColor: '#4b5563',
+                            borderColor: '#e4e7ec',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f2f5',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // Mobile sidebar toggle (add a toggle button in top nav for mobile)
+        // This is a simple implementation - you can enhance as needed
+    </script>
+</body>
+</html>

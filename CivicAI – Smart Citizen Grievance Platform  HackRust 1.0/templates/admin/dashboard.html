@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI · Intelligence Dashboard</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Inter & Plus Jakarta Sans - Premium Font Stack -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* ===== DESIGN SYSTEM ===== */
+        :root {
+            --primary-50: #eef2ff;
+            --primary-100: #e0e7ff;
+            --primary-200: #c7d2fe;
+            --primary-300: #a5b4fc;
+            --primary-400: #818cf8;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-800: #1e40af;
+            --primary-900: #1e3a8a;
+            
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-400: #9ca3af;
+            --neutral-500: #6b7280;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+            --neutral-900: #111827;
+            
+            --success-50: #f0fdf4;
+            --success-500: #22c55e;
+            --success-600: #16a34a;
+            --success-700: #15803d;
+            
+            --warning-50: #fffbeb;
+            --warning-500: #f59e0b;
+            --warning-600: #d97706;
+            
+            --error-50: #fef2f2;
+            --error-500: #ef4444;
+            --error-600: #dc2626;
+            
+            --info-50: #eff6ff;
+            --info-500: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--neutral-50);
+            color: var(--neutral-900);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== PREMIUM SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--neutral-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neutral-300);
+            border-radius: 9999px;
+            transition: all 0.2s;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neutral-400);
+        }
+
+        /* ===== GLASSMORPHISM EFFECTS ===== */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== CARD DESIGNS ===== */
+        .premium-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.02),
+                0 2px 4px -1px rgba(0, 0, 0, 0.01),
+                0 0 0 1px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--neutral-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-300));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.05),
+                0 10px 10px -5px rgba(0, 0, 0, 0.01),
+                0 0 0 1px var(--primary-200);
+            border-color: transparent;
+        }
+
+        .premium-card:hover::before {
+            opacity: 1;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--neutral-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, transparent, var(--primary-50));
+            border-radius: 50%;
+            transform: translate(50px, -50px);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -12px var(--primary-200);
+            border-color: var(--primary-200);
+        }
+
+        .stat-card:hover::after {
+            transform: translate(30px, -30px) scale(1.2);
+            opacity: 0.5;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neutral-900);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--neutral-500);
+            letter-spacing: 0.01em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-trend {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--neutral-200);
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .trend-up { color: var(--success-600); }
+        .trend-down { color: var(--error-600); }
+
+        /* ===== TABLE STYLES ===== */
+        .table-container {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.05);
+        }
+
+        .complaint-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            padding: 0 16px;
+        }
+
+        .complaint-table th {
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--neutral-500);
+            background: transparent;
+        }
+
+        .complaint-table td {
+            padding: 16px 20px;
+            background: var(--neutral-50);
+            border-radius: 16px;
+            font-size: 0.875rem;
+            color: var(--neutral-700);
+            transition: all 0.2s ease;
+        }
+
+        .complaint-row {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .complaint-row:hover td {
+            background: var(--primary-50);
+            transform: scale(1.005);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ===== BADGE SYSTEM ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            gap: 0.375rem;
+        }
+
+        .badge-pending {
+            background: var(--warning-50);
+            color: var(--warning-600);
+            border: 1px solid var(--warning-200);
+        }
+
+        .badge-progress {
+            background: var(--info-50);
+            color: var(--primary-600);
+            border: 1px solid var(--primary-200);
+        }
+
+        .badge-resolved {
+            background: var(--success-50);
+            color: var(--success-600);
+            border: 1px solid var(--success-200);
+        }
+
+        .badge-high {
+            background: var(--error-50);
+            color: var(--error-600);
+            border: 1px solid var(--error-200);
+        }
+
+        .badge-medium {
+            background: var(--warning-50);
+            color: var(--warning-600);
+            border: 1px solid var(--warning-200);
+        }
+
+        .badge-low {
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+            border: 1px solid var(--neutral-200);
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            color: var(--primary-700);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            border: 1px solid var(--primary-200);
+        }
+
+        /* ===== FILTER CHIPS ===== */
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            padding: 0.5rem 1.25rem;
+            background: white;
+            border: 1px solid var(--neutral-200);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--neutral-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .chip:hover {
+            background: var(--neutral-50);
+            border-color: var(--neutral-300);
+            color: var(--neutral-900);
+        }
+
+        .chip.active {
+            background: var(--primary-50);
+            border-color: var(--primary-500);
+            color: var(--primary-700);
+            font-weight: 600;
+        }
+
+        /* ===== PROGRESS BARS ===== */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        /* ===== AI INSIGHT PANEL ===== */
+        .ai-panel {
+            background: linear-gradient(135deg, var(--primary-900), var(--primary-800));
+            border-radius: 24px;
+            padding: 1.75rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(100px, -100px);
+        }
+
+        .ai-panel::after {
+            content: 'AI';
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 6rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.03);
+            line-height: 1;
+        }
+
+        .ai-metric {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 1.25rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ai-metric:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ===== NOTIFICATION PANEL ===== */
+        .notification-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            width: 380px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.3);
+            border: 1px solid var(--neutral-200);
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .notification-panel.show {
+            display: block;
+            animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: var(--neutral-50);
+        }
+
+        .notification-item.unread {
+            background: var(--primary-50);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            color: white;
+            padding: 0.625rem 1.5rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 8px 16px -6px var(--primary-300);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px var(--primary-400);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--neutral-700);
+            padding: 0.625rem 1.5rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid var(--neutral-200);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neutral-50);
+            border-color: var(--neutral-300);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--neutral-200);
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+            box-shadow: 10px 0 30px -15px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            border-radius: 16px;
+            color: var(--neutral-600);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-nav-item i {
+            width: 24px;
+            font-size: 1.25rem;
+            color: var(--neutral-400);
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            background: var(--neutral-50);
+            color: var(--neutral-900);
+        }
+
+        .sidebar-nav-item:hover i {
+            color: var(--primary-500);
+        }
+
+        .sidebar-nav-item.active {
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            color: var(--primary-700);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item.active i {
+            color: var(--primary-600);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 2rem 0.5rem;
+            }
+            
+            .sidebar-nav-item span {
+                display: none;
+            }
+            
+            .sidebar-nav-item {
+                justify-content: center;
+                padding: 0.875rem;
+            }
+            
+            .sidebar-nav-item i {
+                margin: 0;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .logo-text {
+                display: none;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <!-- Logo -->
+        <div class="logo flex items-center gap-3 px-4 mb-8">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
+                <i class="fas fa-city text-white text-lg"></i>
+            </div>
+            <span class="logo-text font-bold text-xl text-neutral-900">Civic<span class="text-primary-600">AI</span></span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="space-y-1">
+            <a href="#" class="sidebar-nav-item active">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Complaints</span>
+                <span class="ml-auto bg-primary-100 text-primary-600 text-xs px-2 py-0.5 rounded-full">342</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-robot"></i>
+                <span>AI Analysis</span>
+                <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full">Live</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-building"></i>
+                <span>Departments</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+                <span class="ml-auto bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded-full">1.2k</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-map"></i>
+                <span>Maps & Heatmap</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Reports</span>
+            </a>
+            
+            <div class="pt-6 mt-6 border-t border-neutral-200">
+                <a href="#" class="sidebar-nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help & Support</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- User Profile -->
+        <div class="absolute bottom-6 left-4 right-4">
+            <div class="bg-neutral-50 rounded-2xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-semibold shadow-lg">
+                        MC
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-neutral-900 truncate">Municipal Commissioner</p>
+                        <p class="text-xs text-neutral-500 truncate">commissioner@city.gov</p>
+                    </div>
+                    <button class="text-neutral-400 hover:text-neutral-600">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+        <!-- Top Navigation -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-neutral-900 font-['Plus_Jakarta_Sans']">Good morning, Commissioner</h1>
+                <p class="text-neutral-500 mt-1">Here's what's happening in your city today</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Search -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-sm"></i>
+                    <input type="text" placeholder="Search complaints, departments..." 
+                           class="pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-2xl w-80 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition text-sm">
+                </div>
+                
+                <!-- Notifications -->
+                <button class="relative p-3 bg-white border border-neutral-200 rounded-2xl hover:border-primary-500 transition" id="notificationBtn">
+                    <i class="fas fa-bell text-neutral-600"></i>
+                    <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error-500 rounded-full ring-2 ring-white"></span>
+                </button>
+                
+                <!-- Profile -->
+                <button class="flex items-center gap-3 bg-white border border-neutral-200 rounded-2xl px-4 py-2.5 hover:border-primary-500 transition">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm">
+                        MC
+                    </div>
+                    <span class="text-sm font-medium text-neutral-700">Admin</span>
+                    <i class="fas fa-chevron-down text-xs text-neutral-400"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Notification Panel -->
+        <div class="notification-panel" id="notificationPanel">
+            <div class="p-4 border-b border-neutral-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-neutral-900">Notifications</h3>
+                    <span class="bg-primary-50 text-primary-600 text-xs px-2 py-1 rounded-full font-medium">3 new</span>
+                </div>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+                {% if notifications %}
+                    {% for notification in notifications %}
+                        <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                            <div class="flex gap-3">
+                                <div class="w-10 h-10 {% if notification.type == 'high_priority' %}bg-error-100{% elif notification.type == 'pending' %}bg-warning-100{% else %}bg-primary-100{% endif %} rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas {% if notification.type == 'high_priority' %}fa-exclamation-triangle text-error-600{% elif notification.type == 'pending' %}fa-clock text-warning-600{% else %}fa-robot text-primary-600{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-neutral-900">{{ notification.title }}</p>
+                                    <p class="text-xs text-neutral-500 mt-0.5">{{ notification.message }}</p>
+                                    <p class="text-xs text-neutral-400 mt-1">{{ notification.created_at.strftime('%H:%M · %d %b') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Static example when no real data -->
+                    <div class="notification-item unread">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 bg-error-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-error-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-neutral-900">High Priority Complaint</p>
+                                <p class="text-xs text-neutral-500 mt-0.5">Pothole reported on Main Street - Sector 17</p>
+                                <p class="text-xs text-neutral-400 mt-1">5 minutes ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notification-item unread">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 bg-warning-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-clock text-warning-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-neutral-900">Pending > 48 Hours</p>
+                                <p class="text-xs text-neutral-500 mt-0.5">Water leakage in Sector 22 awaiting action</p>
+                                <p class="text-xs text-neutral-400 mt-1">2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-robot text-primary-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-neutral-900">AI Auto-Assigned</p>
+                                <p class="text-xs text-neutral-500 mt-0.5">15 complaints categorized to Water Department</p>
+                                <p class="text-xs text-neutral-400 mt-1">3 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="p-3 border-t border-neutral-200 text-center">
+                <a href="#" class="text-sm text-primary-600 hover:text-primary-700 font-medium">View all notifications</a>
+            </div>
+        </div>
+
+        <!-- ===== STATS CARDS WITH REAL DATA ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Complaints -->
+            <div class="stat-card animate-card delay-1">
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-value">{{ total_complaints|default('1,284') }}</div>
+                <div class="stat-label">Total Complaints</div>
+                <div class="stat-trend">
+                    <span class="trend-up"><i class="fas fa-arrow-up mr-1"></i>+{{ weekly_growth|default('12') }}%</span>
+                    <span class="text-neutral-400">vs last month</span>
+                </div>
+            </div>
+
+            <!-- Pending -->
+            <div class="stat-card animate-card delay-2">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">{{ pending_complaints|default('342') }}</div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-trend">
+                    <span class="trend-down"><i class="fas fa-arrow-down mr-1"></i>-{{ pending_decrease|default('8') }}%</span>
+                    <span class="text-neutral-400">{{ overdue_count|default('23') }} overdue</span>
+                </div>
+            </div>
+
+            <!-- Resolved -->
+            <div class="stat-card animate-card delay-3">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ resolved_complaints|default('892') }}</div>
+                <div class="stat-label">Resolved</div>
+                <div class="stat-trend">
+                    <span class="trend-up"><i class="fas fa-arrow-up mr-1"></i>+{{ resolved_increase|default('15') }}%</span>
+                    <span class="text-neutral-400">{{ resolution_rate|default('69') }}% success</span>
+                </div>
+            </div>
+
+            <!-- High Priority -->
+            <div class="stat-card animate-card delay-4">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value">{{ high_priority_count|default('23') }}</div>
+                <div class="stat-label">High Priority</div>
+                <div class="stat-trend">
+                    <span class="text-error-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ critical_count|default('8') }} critical</span>
+                    <span class="text-neutral-400 ml-auto">urgent</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== AI INSIGHTS PANEL ===== -->
+        <div class="ai-panel mb-8 animate-card delay-5">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">AI Intelligence Engine</h3>
+                        <p class="text-blue-200 text-sm mt-1">Real-time classification & anomaly detection</p>
+                    </div>
+                    <div class="bg-white/20 rounded-2xl px-4 py-2 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        <span class="text-sm text-white font-medium">Active</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Today's Classifications -->
+                    <div class="ai-metric">
+                        <p class="text-blue-200 text-xs mb-2">Today's Classifications</p>
+                        <p class="text-3xl font-bold text-white">{{ ai_classifications_today|default('147') }}</p>
+                        <p class="text-blue-300 text-xs mt-1 flex items-center gap-1">
+                            <i class="fas fa-arrow-up text-green-400"></i> {{ ai_growth|default('23') }} from yesterday
+                        </p>
+                    </div>
+
+                    <!-- Avg Confidence -->
+                    <div class="ai-metric">
+                        <p class="text-blue-200 text-xs mb-2">Average Confidence</p>
+                        <p class="text-3xl font-bold text-white">{{ avg_confidence|default('94') }}%</p>
+                        <div class="progress-bar bg-white/20 mt-2">
+                            <div class="progress-fill bg-green-400" style="width: {{ avg_confidence|default('94') }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Duplicates Detected -->
+                    <div class="ai-metric">
+                        <p class="text-blue-200 text-xs mb-2">Duplicates Detected</p>
+                        <p class="text-3xl font-bold text-white">{{ duplicates_count|default('12') }}</p>
+                        <p class="text-blue-300 text-xs mt-1">Saved {{ hours_saved|default('8') }}h processing</p>
+                    </div>
+
+                    <!-- Urgency Detection -->
+                    <div class="ai-metric">
+                        <p class="text-blue-200 text-xs mb-2">Urgency Detection</p>
+                        <p class="text-3xl font-bold text-white">{{ urgent_count|default('8') }}</p>
+                        <p class="text-blue-300 text-xs mt-1">High priority flagged</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CHARTS ROW ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Category Distribution -->
+            <div class="premium-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-neutral-900">Complaints by Category</h3>
+                    <button class="text-neutral-400 hover:text-neutral-600">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+                <canvas id="categoryChart" height="200"></canvas>
+                <div class="mt-6 space-y-3">
+                    {% if category_stats %}
+                        {% for category in category_stats %}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full" style="background-color: {{ category.color }}"></div>
+                                    <span class="text-sm text-neutral-600">{{ category.name }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium text-neutral-900">{{ category.percentage }}%</span>
+                                    <span class="text-xs text-neutral-500">{{ category.count }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Static fallback -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                                <span class="text-sm text-neutral-600">Roads & Potholes</span>
+                            </div>
+                            <span class="text-sm font-medium text-neutral-900">35%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                                <span class="text-sm text-neutral-600">Water Supply</span>
+                            </div>
+                            <span class="text-sm font-medium text-neutral-900">28%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <span class="text-sm text-neutral-600">Electricity</span>
+                            </div>
+                            <span class="text-sm font-medium text-neutral-900">20%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm text-neutral-600">Waste Management</span>
+                            </div>
+                            <span class="text-sm font-medium text-neutral-900">17%</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Monthly Trends -->
+            <div class="premium-card p-6 col-span-2">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-neutral-900">Monthly Trends</h3>
+                    <select class="text-sm border border-neutral-200 rounded-xl px-3 py-2 bg-white">
+                        <option>Last 6 months</option>
+                        <option>Last year</option>
+                        <option>All time</option>
+                    </select>
+                </div>
+                <canvas id="trendChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- ===== COMPLAINTS TABLE ===== -->
+        <div class="table-container mb-8">
+            <div class="p-6 border-b border-neutral-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-neutral-900">Active Complaints</h3>
+                    <div class="flex items-center gap-4">
+                        <!-- Filters -->
+                        <div class="filter-chips">
+                            <span class="chip active">All</span>
+                            <span class="chip">Pending</span>
+                            <span class="chip">In Progress</span>
+                            <span class="chip">Resolved</span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <button class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            New Complaint
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="complaint-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Category (AI)</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Department</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if complaints %}
+                            {% for complaint in complaints %}
+                                <tr class="complaint-row" onclick="window.location='{{ url_for('view_complaint', complaint_id=complaint.id) }}'">
+                                    <td class="font-mono font-medium">#{{ complaint.complaint_number }}</td>
+                                    <td class="font-medium">{{ complaint.title }}</td>
+                                    <td>
+                                        <span class="ai-badge">
+                                            <i class="fas fa-robot text-xs"></i>
+                                            {{ complaint.ai_category }} ({{ complaint.confidence }}%)
+                                        </span>
+                                    </td>
+                                    <td>{{ complaint.location }}</td>
+                                    <td>
+                                        {% if complaint.status == 'pending' %}
+                                            <span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                                        {% elif complaint.status == 'in_progress' %}
+                                            <span class="badge badge-progress"><i class="fas fa-sync-alt"></i> In Progress</span>
+                                        {% elif complaint.status == 'resolved' %}
+                                            <span class="badge badge-resolved"><i class="fas fa-check-circle"></i> Resolved</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if complaint.priority == 'high' %}
+                                            <span class="badge badge-high"><i class="fas fa-exclamation"></i> High</span>
+                                        {% elif complaint.priority == 'medium' %}
+                                            <span class="badge badge-medium"><i class="fas fa-chart-line"></i> Medium</span>
+                                        {% else %}
+                                            <span class="badge badge-low"><i class="fas fa-arrow-down"></i> Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ complaint.department.name }}</td>
+                                    <td class="text-neutral-500">{{ complaint.created_at.strftime('%d %b, %H:%M') }}</td>
+                                    <td>
+                                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                                            <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-primary-600 hover:border-primary-600 transition">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-success-600 hover:border-success-600 transition">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-warning-600 hover:border-warning-600 transition">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Static example data -->
+                            <tr class="complaint-row">
+                                <td class="font-mono font-medium">#C001</td>
+                                <td class="font-medium">Broken street light</td>
+                                <td><span class="ai-badge"><i class="fas fa-robot text-xs"></i> Street Light (96%)</span></td>
+                                <td>Sector 17, Main St</td>
+                                <td><span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                <td><span class="badge badge-high"><i class="fas fa-exclamation"></i> High</span></td>
+                                <td>Public Safety</td>
+                                <td class="text-neutral-500">15 Mar, 09:30</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-primary-600"><i class="fas fa-eye"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-success-600"><i class="fas fa-check"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-warning-600"><i class="fas fa-exchange-alt"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="complaint-row">
+                                <td class="font-mono font-medium">#C002</td>
+                                <td class="font-medium">Water leakage main pipeline</td>
+                                <td><span class="ai-badge"><i class="fas fa-robot text-xs"></i> Water Supply (98%)</span></td>
+                                <td>Sector 22, Block C</td>
+                                <td><span class="badge badge-progress"><i class="fas fa-sync-alt"></i> In Progress</span></td>
+                                <td><span class="badge badge-high"><i class="fas fa-exclamation"></i> High</span></td>
+                                <td>Water Dept</td>
+                                <td class="text-neutral-500">14 Mar, 14:15</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-primary-600"><i class="fas fa-eye"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-success-600"><i class="fas fa-check"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-warning-600"><i class="fas fa-exchange-alt"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="complaint-row">
+                                <td class="font-mono font-medium">#C003</td>
+                                <td class="font-medium">Garbage not collected</td>
+                                <td><span class="ai-badge"><i class="fas fa-robot text-xs"></i> Waste (92%)</span></td>
+                                <td>Sector 45, Market</td>
+                                <td><span class="badge badge-resolved"><i class="fas fa-check-circle"></i> Resolved</span></td>
+                                <td><span class="badge badge-medium"><i class="fas fa-chart-line"></i> Medium</span></td>
+                                <td>Waste Mgmt</td>
+                                <td class="text-neutral-500">13 Mar, 11:20</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-primary-600"><i class="fas fa-eye"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-success-600"><i class="fas fa-check"></i></button>
+                                        <button class="w-8 h-8 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-warning-600"><i class="fas fa-exchange-alt"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-neutral-200 flex items-center justify-between">
+                <p class="text-sm text-neutral-500">Showing {% if complaints %}{{ complaints|length }}{% else %}3{% endif %} of {{ total_complaints|default('342') }} complaints</p>
+                <div class="flex gap-2">
+                    <button class="w-10 h-10 border border-neutral-200 rounded-xl text-neutral-400 hover:border-primary-500 hover:text-primary-600 transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="w-10 h-10 bg-primary-600 text-white rounded-xl font-medium">1</button>
+                    <button class="w-10 h-10 border border-neutral-200 rounded-xl text-neutral-600 hover:border-primary-500 transition">2</button>
+                    <button class="w-10 h-10 border border-neutral-200 rounded-xl text-neutral-600 hover:border-primary-500 transition">3</button>
+                    <button class="w-10 h-10 border border-neutral-200 rounded-xl text-neutral-400 hover:border-primary-500 hover:text-primary-600 transition">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MAP & DEPARTMENT PERFORMANCE ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Map Preview -->
+            <div class="premium-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-neutral-900">City Heatmap</h3>
+                    <div class="filter-chips">
+                        <span class="chip active">All</span>
+                        <span class="chip">High Priority</span>
+                        <span class="chip">Hotspots</span>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-2xl h-80 flex items-center justify-center text-neutral-400 relative overflow-hidden">
+                    <!-- Map placeholder with gradient effect -->
+                    <div class="absolute inset-0 opacity-20">
+                        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2563eb" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#grid)" />
+                        </svg>
+                    </div>
+                    
+                    <!-- Heat spots -->
+                    <div class="absolute top-1/4 left-1/4 w-20 h-20 bg-primary-500 rounded-full filter blur-xl opacity-30"></div>
+                    <div class="absolute bottom-1/3 right-1/3 w-32 h-32 bg-error-500 rounded-full filter blur-xl opacity-20"></div>
+                    <div class="absolute top-1/2 right-1/4 w-24 h-24 bg-warning-500 rounded-full filter blur-xl opacity-25"></div>
+                    
+                    <div class="relative z-10 text-center">
+                        <i class="fas fa-map-marked-alt text-5xl text-neutral-300 mb-3"></i>
+                        <p class="text-neutral-500 font-medium">{{ active_hotspots|default('12') }} active hotspots</p>
+                        <p class="text-sm text-neutral-400 mt-1">{{ total_complaints_located|default('342') }} complaints mapped</p>
+                        <button class="mt-4 px-6 py-2.5 bg-white rounded-xl text-sm font-medium text-primary-600 shadow-lg hover:shadow-xl transition">
+                            <i class="fas fa-expand-alt mr-2"></i>Open Map View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Performance -->
+            <div class="premium-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-neutral-900">Department Performance</h3>
+                    <a href="#" class="text-sm text-primary-600 hover:text-primary-700 font-medium">View all →</a>
+                </div>
+
+                <div class="space-y-6">
+                    {% if department_stats %}
+                        {% for dept in department_stats %}
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-{{ dept.color }}-500"></span>
+                                        <span class="text-sm font-medium text-neutral-700">{{ dept.name }}</span>
+                                    </div>
+                                    <span class="text-sm font-semibold text-neutral-900">{{ dept.resolved_rate }}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-{{ dept.color }}-500" style="width: {{ dept.resolved_rate }}%"></div>
+                                </div>
+                                <div class="flex items-center justify-between mt-1">
+                                    <span class="text-xs text-neutral-500">{{ dept.resolved_count }} resolved</span>
+                                    <span class="text-xs text-neutral-500">{{ dept.pending_count }} pending</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                                    <span class="text-sm font-medium text-neutral-700">Roads & Infrastructure</span>
+                                </div>
+                                <span class="text-sm font-semibold text-neutral-900">78%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-blue-600" style="width: 78%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs text-neutral-500">342 resolved</span>
+                                <span class="text-xs text-neutral-500">96 pending</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                                    <span class="text-sm font-medium text-neutral-700">Water Supply</span>
+                                </div>
+                                <span class="text-sm font-semibold text-neutral-900">65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-cyan-600" style="width: 65%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs text-neutral-500">245 resolved</span>
+                                <span class="text-xs text-neutral-500">132 pending</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-yellow-600"></span>
+                                    <span class="text-sm font-medium text-neutral-700">Electricity Board</span>
+                                </div>
+                                <span class="text-sm font-semibold text-neutral-900">82%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-yellow-600" style="width: 82%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs text-neutral-500">187 resolved</span>
+                                <span class="text-xs text-neutral-500">41 pending</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-600"></span>
+                                    <span class="text-sm font-medium text-neutral-700">Waste Management</span>
+                                </div>
+                                <span class="text-sm font-semibold text-neutral-900">71%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-green-600" style="width: 71%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs text-neutral-500">156 resolved</span>
+                                <span class="text-xs text-neutral-500">64 pending</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle notification panel
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationPanel = document.getElementById('notificationPanel');
+
+        notificationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationPanel.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                notificationPanel.classList.remove('show');
+            }
+        });
+
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Roads', 'Water', 'Electricity', 'Waste'],
+                datasets: [{
+                    data: [35, 28, 20, 17],
+                    backgroundColor: ['#3b82f6', '#06b6d4', '#f59e0b', '#10b981'],
+                    borderWidth: 0,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                cutout: '70%',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Complaints',
+                        data: [420, 380, 450, 520, 480, 590],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Resolved',
+                        data: [380, 350, 400, 420, 430, 500],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { 
+                        backgroundColor: 'white',
+                        titleColor: '#111827',
+                        bodyColor: '#6b7280',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6' },
+                        ticks: { color: '#6b7280' }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#6b7280' }
+                    }
+                }
+            }
+        });
+
+        // Filter chips
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                if (!this.classList.contains('active')) {
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Here you would fetch filtered data from backend
+                    const filter = this.textContent.trim();
+                    console.log('Filtering by:', filter);
+                }
+            });
+        });
+
+        // Row click prevention for action buttons
+        document.querySelectorAll('.complaint-row .flex.gap-2').forEach(actionGroup => {
+            actionGroup.addEventListener('click', (e) => e.stopPropagation());
+        });
+
+        // Mobile sidebar toggle (if needed)
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('mobile-open');
+        }
+
+        // Add smooth entrance animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.stat-card, .premium-card, .ai-panel');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + (index * 50));
+            });
+        });
+    </script>
+</body>
+</html>
